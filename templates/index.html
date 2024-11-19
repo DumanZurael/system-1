@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מערכת ניהול משמרות - שקדייה</title>
+    {% include 'admin_base.html' %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .day-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: white;
+        }
+        .day-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .shift {
+            margin: 5px 0;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .shift-morning {
+            border-left: 4px solid #ffc107;
+        }
+        .shift-evening {
+            border-left: 4px solid #17a2b8;
+        }
+        .employees-list {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        select {
+            padding: 5px;
+            margin: 5px 0;
+            width: 100%;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+        .employee-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            background-color: white;
+            border: 2px solid;
+            color: #333;
+        }
+        .employee-name {
+            cursor: pointer;
+            padding: 0 4px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .employee-name:hover {
+            opacity: 0.8;
+        }
+        .remove-employee {
+            margin-right: 6px;
+            cursor: pointer;
+            opacity: 0.7;
+            font-size: 0.8em;
+            color: #666;
+        }
+        .remove-employee:hover {
+            opacity: 1;
+            color: #ff4444;
+        }
+        .employees-container {
+            margin-top: 5px;
+            min-height: 30px;
+        }
+        .employee-details-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .employee-details-content {
+            position: relative;
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 400px;
+            border-radius: 8px;
+        }
+
+        .employee-name {
+            cursor: pointer;
+            text-decoration: underline;
+            color: #007bff;
+        }
+
+        .employee-name:hover {
+            color: #0056b3;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        .add-button {
+            padding: 4px 8px;
+            margin-right: 5px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .add-button:hover {
+            background-color: #218838;
+        }
+        
+        select {
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-right: 5px;
+        }
+        .logout-btn {
+            padding: 8px 16px;
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .admin-nav {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .admin-nav a {
+            margin-left: 15px;
+            padding: 5px 10px;
+            text-decoration: none;
+            color: #333;
+        }
+        .admin-nav a:hover {
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .appeals-badge {
+            background-color: #dc3545;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-right: 5px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: black;
+        }
+
+        .employee-details {
+            margin-top: 20px;
+        }
+
+        .employee-details p {
+            margin: 10px 0;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .employee-name {
+            cursor: pointer;
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        .employee-name:hover {
+            opacity: 0.8;
+        }
+
+        /* התאמה ל��ובייל */
+        @media (max-width: 768px) {
+            .calendar {
+                display: block;  /* שינוי מ-grid ל-block */
+                padding: 10px;
+            }
+
+            .day-card {
+                margin-bottom: 20px;
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                animation: slideIn 0.3s ease-out;
+            }
+
+            .day-header {
+                background-color: var(--primary-color);
+                color: white;
+                padding: 15px;
+                border-radius: 12px 12px 0 0;
+                font-size: 1.2em;
+                text-align: center;
+            }
+
+            .shift {
+                padding: 15px;
+                margin: 10px;
+                border-radius: 8px;
+                background-color: var(--card-background);
+            }
+
+            .employees-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin: 10px 0;
+            }
+
+            .employee-tag {
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 0.9em;
+            }
+
+            /* אנימציית כני לכרטיסי ימים */
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* התאמת תיבת הבחירה והכפתור */
+            .shift-controls {
+                display: flex;
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            select {
+                flex: 1;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+            }
+
+            .add-button {
+                padding: 10px 20px;
+                border-radius: 8px;
+            }
+
+            /* אינדיקטור לגלילה */
+            .scroll-indicator {
+                display: block;
+                text-align: center;
+                padding: 10px;
+                color: var(--text-secondary);
+                font-size: 0.9em;
+                margin-top: 10px;
+            }
+
+            .scroll-indicator::after {
+                content: '⌄';
+                display: block;
+                font-size: 1.5em;
+                animation: bounce 1s infinite;
+            }
+
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(5px); }
+            }
+        }
+
+        h1 {
+            color: var(--text-primary);  /* שימוש בצע הטקסט הדינמי */
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        /* התאמה למובייל */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+                padding: 0.8rem;
+                margin-top: 3rem; /* מרווח מלמעלה בשביל כפתור ההמבורגר */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% include 'admin_nav.html' %}
+        
+        <div class="content-wrapper">
+            <div class="calendar">
+                {% for day, shifts in schedule.items() %}
+                <div class="day-card">
+                    <div class="day-header">{{ day }}</div>
+                    {% for shift in shifts %}
+                    <div class="shift {% if loop.index0 == 0 %}shift-morning{% else %}shift-evening{% endif %}">
+                        <div>{{ 'משמרת בוקר' if loop.index0 == 0 else 'משמרת ערב' }}</div>
+                        <div>{{ shift.start_time }} - {{ shift.end_time }}</div>
+                        <div class="employees-list">
+                            <div class="employees-container">
+                                {% set outer_loop = loop %}
+                                {% for employee in shift.employees %}
+                                    <span class="employee-tag" 
+                                          style="border-color: {{ get_employee_color(employee) }}">
+                                        <span class="employee-name" 
+                                              onclick="showEmployeeDetails('{{ employee }}')">
+                                            {{ system.users[employee].first_name }}
+                                        </span>
+                                        <span class="remove-employee" 
+                                              onclick="removeFromShift('{{ day }}', {{ outer_loop.index0 }}, '{{ employee }}')">✕</span>
+                                    </span>
+                                {% endfor %}
+                            </div>
+                            <select id="employee-{{ day }}-{{ loop.index0 }}">
+                                <option value="" disabled selected>בחר עובד</option>
+                                {% for employee in employees %}
+                                    <option value="{{ employee.username }}" 
+                                            style="background-color: {{ get_employee_color(employee.username) }}; color: white;">
+                                        {{ employee.display_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button onclick="assignSelectedEmployee('{{ day }}', {{ loop.index0 }})" class="add-button">הוסף</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div id="employeeDetailsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="hideEmployeeDetails()">&times;</span>
+            <h3>פרטי עובד</h3>
+            <div class="employee-details">
+                <p><strong>שם מלא:</strong> <span id="fullName"></span></p>
+                <p><strong>מספר עובד:</strong> <span id="empNumber"></span></p>
+                <p><strong>טלפון:</strong> <span id="empPhone"></span></p>
+                <p><strong>אימייל:</strong> <span id="empEmail"></span></p>
+                <p><strong>תעודת זהות:</strong> <span id="empId"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function assignSelectedEmployee(day, shiftIndex) {
+            const selectElement = document.getElementById(`employee-${day}-${shiftIndex}`);
+            const employee = selectElement.value;
+            
+            if (!employee) {
+                alert('נא לבחור עובד');
+                return;
+            }
+            
+            assignShift(day, shiftIndex, employee);
+            selectElement.value = '';
+        }
+
+        function assignShift(day, shiftIndex, employee) {
+            fetch('/assign_shift', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `day=${day}&shift_index=${shiftIndex}&employee=${employee}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'אירעה שגיאה בהוספת העובד');
+                }
+            });
+        }
+
+        function removeFromShift(day, shiftIndex, employee) {
+            console.log('Removing:', { day, shiftIndex, employee });
+            
+            if (confirm(`האם להסיר את ${employee} מהמשמרת?`)) {
+                fetch('/remove_from_shift', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `day=${encodeURIComponent(day)}&shift_index=${shiftIndex}&employee=${encodeURIComponent(employee)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Server response:', data);
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'אירעה שגיאה בהסרת העובד');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('אירעה שגיאה בהסרת העובד');
+                });
+            }
+        }
+
+        function showEmployeeDetails(username) {
+            fetch(`/get_employee/${username}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('fullName').textContent = 
+                        `${data.first_name} ${data.last_name}`;
+                    document.getElementById('empNumber').textContent = 
+                        data.employee_number || 'לא הוגדר';
+                    document.getElementById('empPhone').textContent = 
+                        data.phone || 'לא הוגדר';
+                    document.getElementById('empEmail').textContent = 
+                        data.email || 'לא הוגדר';
+                    document.getElementById('empId').textContent = 
+                        data.id_number || 'לא הוגדר';
+                    
+                    document.getElementById('employeeDetailsModal').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('אירעה שגיאה בטעינת פרטי העובד');
+                });
+        }
+
+        function hideEmployeeDetails() {
+            document.getElementById('employeeDetailsModal').style.display = 'none';
+        }
+
+        // סגירת המודאל בלחיצה מחוץ לתוכן
+        window.onclick = function(event) {
+            const modal = document.getElementById('employeeDetailsModal');
+            if (event.target == modal) {
+                hideEmployeeDetails();
+            }
+        }
+
+        // הוספת אינדיקטור גלילה במובייל
+        document.addEventListener('DOMContentLoaded', function() {
+            const indicator = document.createElement('div');
+            indicator.className = 'scroll-indicator';
+            indicator.textContent = 'גלול למטה לימים נוספים';
+            
+            // פונקציה לבדיקת גודל המסך והצגת/הסתרת האינדיקטור
+            function handleScreenSize() {
+                const container = document.querySelector('.calendar');
+                
+                // הסרת אינדיקטור קיים אם יש
+                const existingIndicator = document.querySelector('.scroll-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+                
+                // הוספת האינדיקטור רק במובייל
+                if (window.innerWidth <= 768) {
+                    container.insertBefore(indicator, container.firstChild);
+                    
+                    // הסתרת האינדיקטור בגלילה לסוף הדף
+                    window.addEventListener('scroll', function() {
+                        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+                            indicator.style.display = 'none';
+                        } else {
+                            indicator.style.display = 'block';
+                        }
+                    });
+                }
+            }
+
+            // הפעלה בטעינה ובשינוי גודל המסך
+            handleScreenSize();
+            window.addEventListener('resize', handleScreenSize);
+        });
+    </script>
+</body>
+</html> 

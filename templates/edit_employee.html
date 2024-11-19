@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>עריכת פרטי עובד - שקדייה</title>
+    {% include 'admin_base.html' %}
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+
+        .show-password {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .show-password:hover {
+            color: var(--primary-color);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>עריכת פרטי עובד - {{ user.first_name }} {{ user.last_name }}</h1>
+        
+        {% include 'admin_nav.html' %}
+        
+        <div class="form-container">
+            <form method="POST">
+                <div class="form-group">
+                    <label>שם משתמש:</label>
+                    <input type="text" value="{{ user.username }}" class="form-control" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label>סיסמה:</label>
+                    <div class="password-container">
+                        <input type="password" name="password" id="password" 
+                               class="form-control" value="{{ user.password }}">
+                        <button type="button" class="show-password" onclick="togglePassword()">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>שם פרטי:</label>
+                    <input type="text" name="first_name" class="form-control" 
+                           value="{{ user.first_name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>שם משפחה:</label>
+                    <input type="text" name="last_name" class="form-control" 
+                           value="{{ user.last_name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>מספר עובד:</label>
+                    <input type="text" name="employee_number" class="form-control" 
+                           value="{{ user.employee_number }}">
+                </div>
+                
+                <div class="form-group">
+                    <label>טלפון:</label>
+                    <input type="tel" name="phone" class="form-control" 
+                           value="{{ user.phone }}">
+                </div>
+                
+                <div class="form-group">
+                    <label>אימייל:</label>
+                    <input type="email" name="email" class="form-control" 
+                           value="{{ user.email }}">
+                </div>
+                
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary">שמור שינויים</button>
+                    <a href="{{ url_for('employees') }}" class="btn btn-danger">ביטול</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const showPasswordBtn = document.querySelector('.show-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                showPasswordBtn.textContent = '🔒';
+            } else {
+                passwordInput.type = 'password';
+                showPasswordBtn.textContent = '👁️';
+            }
+        }
+    </script>
+</body>
+</html> 

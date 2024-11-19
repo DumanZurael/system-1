@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול עובדים - שקדייה</title>
+    {% include 'admin_base.html' %}
+    <style>
+        .employees-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .employees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .employee-card {
+            background-color: var(--card-background);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .employee-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .employee-details {
+            margin-bottom: 1.5rem;
+        }
+
+        .employee-detail {
+            display: flex;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .employee-detail strong {
+            min-width: 100px;
+            color: var(--text-primary);
+        }
+
+        .employee-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .add-employee-btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--success-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s ease;
+        }
+
+        .add-employee-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .btn-edit {
+            background-color: var(--primary-color);
+        }
+
+        .btn-delete {
+            background-color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="employees-container">
+            <h1>ניהול עובדים</h1>
+            
+            {% include 'admin_nav.html' %}
+            
+            <a href="{{ url_for('add_employee') }}" class="add-employee-btn">+ הוסף עובד חדש</a>
+            
+            <div class="employees-grid">
+                {% for username, user in system.users.items() %}
+                    {% if not user.is_admin %}
+                        <div class="employee-card fade-in">
+                            <div class="employee-header">
+                                <span class="employee-name">{{ user.first_name }} {{ user.last_name }}</span>
+                            </div>
+                            
+                            <div class="employee-details">
+                                <div class="employee-detail">
+                                    <strong>שם משתמש:</strong>
+                                    <span>{{ username }}</span>
+                                </div>
+                                {% if user.employee_number %}
+                                <div class="employee-detail">
+                                    <strong>מספר עובד:</strong>
+                                    <span>{{ user.employee_number }}</span>
+                                </div>
+                                {% endif %}
+                                {% if user.phone %}
+                                <div class="employee-detail">
+                                    <strong>טלפון:</strong>
+                                    <span>{{ user.phone }}</span>
+                                </div>
+                                {% endif %}
+                                {% if user.email %}
+                                <div class="employee-detail">
+                                    <strong>אימייל:</strong>
+                                    <span>{{ user.email }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="employee-actions">
+                                <button class="btn btn-edit" onclick="editEmployee('{{ username }}')">
+                                    עריכה
+                                </button>
+                                <button class="btn btn-delete" onclick="deleteEmployee('{{ username }}')">
+                                    מחיקה
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function editEmployee(username) {
+            window.location.href = `/edit_employee/${username}`;
+        }
+        
+        function deleteEmployee(username) {
+            if (confirm('האם אתה בטוח שברצונך למחוק עובד זה?')) {
+                fetch(`/delete_employee/${username}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('אירעה שגיאה במחיקת העובד');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

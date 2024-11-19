@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>תצוגה מקדימה - לוח משמרות</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .preview-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .day-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 200px;
+        }
+        .day-header {
+            font-weight: bold;
+            text-align: center;
+            padding: 5px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .shift-container {
+            margin-bottom: 10px;
+        }
+        .shift-morning {
+            border-right: 4px solid #ffc107;
+            padding: 5px;
+            margin: 5px 0;
+            background-color: #fff9e6;
+        }
+        .shift-evening {
+            border-right: 4px solid #17a2b8;
+            padding: 5px;
+            margin: 5px 0;
+            background-color: #e6f7fa;
+        }
+        .shift-time {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .employee-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            color: white;
+        }
+        .legend {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .legend-item {
+            display: inline-block;
+            margin: 5px;
+        }
+        .download-btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .back-btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #6c757d;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <h1 style="text-align: center;">לוח משמרות שבועי - שקדייה</h1>
+        
+        <!-- מקרא צבעים -->
+        <div class="legend">
+            <h3>מקרא עובדים:</h3>
+            <div class="legend-item">
+                <span class="employee-tag" style="background-color: #007bff;">יוסי</span>
+            </div>
+            <div class="legend-item">
+                <span class="employee-tag" style="background-color: #28a745;">רחל</span>
+            </div>
+            <div class="legend-item">
+                <span class="employee-tag" style="background-color: #dc3545;">משה</span>
+            </div>
+            <div class="legend-item">
+                <span class="employee-tag" style="background-color: #6f42c1;">שרה</span>
+            </div>
+        </div>
+
+        <div class="calendar-grid">
+            {% for day, shifts in schedule.items() %}
+            <div class="day-card">
+                <div class="day-header">{{ day }}</div>
+                {% for shift in shifts %}
+                <div class="shift-container">
+                    <div class="{% if loop.index0 == 0 %}shift-morning{% else %}shift-evening{% endif %}">
+                        <div class="shift-time">
+                            {{ 'משמרת בוקר' if loop.index0 == 0 else 'משמרת ערב' }}<br>
+                            {{ shift.start_time }} - {{ shift.end_time }}
+                        </div>
+                        {% for employee in shift.employees %}
+                        <span class="employee-tag" 
+                              style="background-color: {{ get_employee_color(employee) }}">
+                            {{ employee }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <a href="{{ url_for('download_pdf') }}" class="download-btn">הורד PDF</a>
+        <a href="{{ url_for('index') }}" class="back-btn">חזור ללוח המשמרות</a>
+    </div>
+</body>
+</html> 

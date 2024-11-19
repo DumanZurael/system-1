@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ערעורים - שקדייה</title>
+    {% include 'admin_base.html' %}
+    <style>
+        .appeals-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .appeal-card {
+            animation: fadeIn 0.3s ease forwards;
+            margin-bottom: 1.5rem;
+        }
+        
+        .appeal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .appeal-details {
+            margin-bottom: 1.5rem;
+        }
+        
+        .appeal-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .approve-btn {
+            background-color: var(--success-color);
+        }
+        
+        .reject-btn {
+            background-color: var(--danger-color);
+        }
+        
+        .response-input {
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            opacity: 0;
+            height: 0;
+        }
+        
+        .response-input.show {
+            opacity: 1;
+            height: 40px;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: var(--warning-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="appeals-container">
+            <h1 class="fade-in">ערעורים - שקדייה</h1>
+            
+            {% include 'admin_nav.html' %}
+            
+            <div class="appeals-list">
+                {% if appeals %}
+                    {% for appeal in appeals %}
+                        <div class="card appeal-card" id="appeal-{{ loop.index0 }}">
+                            <div class="appeal-header">
+                                <div>
+                                    <h3>{{ appeal.employee }}</h3>
+                                    <span class="status-badge status-pending">ממתין</span>
+                                </div>
+                                <span>{{ appeal.day }}</span>
+                            </div>
+                            <div class="appeal-details">
+                                <p>
+                                    <strong>משמרת:</strong> 
+                                    {% if appeal.shift_index == 0 %}בוקר{% else %}ערב{% endif %}
+                                </p>
+                                <p><strong>סיבה:</strong> {{ appeal.reason }}</p>
+                            </div>
+                            <div class="appeal-actions">
+                                <button class="btn btn-success approve-btn" 
+                                        onclick="handleAppeal({{ loop.index0 }}, 'approved')">
+                                    <i class="fas fa-check"></i>
+                                    אישור
+                                </button>
+                                <button class="btn btn-danger reject-btn" 
+                                        onclick="showResponseInput({{ loop.index0 }})">
+                                    <i class="fas fa-times"></i>
+                                    דחייה
+                                </button>
+                            </div>
+                            <input type="text" 
+                                   id="response-{{ loop.index0 }}" 
+                                   class="form-control response-input" 
+                                   placeholder="סיבת הדחייה"
+                                   onkeypress="handleResponseKeyPress(event, {{ loop.index0 }})">
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="card fade-in">
+                        <div class="no-appeals">
+                            <h3>אין ערעורים ממתינים</h3>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showResponseInput(appealIndex) {
+            const input = document.getElementById(`response-${appealIndex}`);
+            input.classList.add('show');
+            input.focus();
+        }
+        
+        function handleResponseKeyPress(event, appealIndex) {
+            if (event.key === 'Enter') {
+                const response = event.target.value;
+                handleAppeal(appealIndex, 'rejected', response);
+            }
+        }
+        
+        function handleAppeal(appealIndex, decision, response = '') {
+            const appealCard = document.getElementById(`appeal-${appealIndex}`);
+            appealCard.style.opacity = '0.5';
+            
+            fetch('/handle_appeal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appeal_index: appealIndex,
+                    decision: decision,
+                    response: response
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      appealCard.style.transform = 'translateX(100%)';
+                      setTimeout(() => {
+                          appealCard.remove();
+                          
+                          const remainingAppeals = document.querySelectorAll('.appeal-card');
+                          if (remainingAppeals.length === 0) {
+                              const container = document.querySelector('.appeals-list');
+                              container.innerHTML = `
+                                  <div class="card fade-in">
+                                      <div class="no-appeals">
+                                          <h3>אין ערעורים ממתינים</h3>
+                                      </div>
+                                  </div>`;
+                          }
+                      }, 300);
+                  } else {
+                      appealCard.style.opacity = '1';
+                      alert('אירעה שגיאה בטיפול בערעור');
+                  }
+              });
+        }
+    </script>
+</body>
+</html> 

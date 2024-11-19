@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>המשמרות שלי - שקדייה</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        /* סגנון תצוגת לוח שנה */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .day-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 200px;
+        }
+        .day-header {
+            font-weight: bold;
+            text-align: center;
+            padding: 5px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .shift-container {
+            margin-bottom: 10px;
+        }
+        .shift-morning {
+            border-right: 4px solid #ffc107;
+            padding: 5px;
+            margin: 5px 0;
+            background-color: #fff9e6;
+        }
+        .shift-evening {
+            border-right: 4px solid #17a2b8;
+            padding: 5px;
+            margin: 5px 0;
+            background-color: #e6f7fa;
+        }
+        .shift-time {
+            font-size: 0.9em;
+            color: #666;
+        }
+        /* סגנון כפתורים */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            margin-left: 10px;
+        }
+        .download-btn {
+            background-color: #28a745;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .week-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .nav-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .current-week {
+            font-weight: bold;
+            color: #495057;
+        }
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .view-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+        .view-btn.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat({% if view_type == 'month' %}7{% else %}7{% endif %}, 1fr);
+            gap: 10px;
+        }
+        .day-card {
+            min-height: {% if view_type == 'month' %}120px{% else %}200px{% endif %};
+        }
+        .current-datetime {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: #495057;
+        }
+        .current-date, .current-time {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+        /* הוספת סגנונות לכפתור ערעור */
+        .appeal-btn {
+            background-color: #ffc107;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .appeal-btn:hover {
+            background-color: #e0a800;
+        }
+        /* סגנונות למודאל */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .modal textarea {
+            width: 100%;
+            min-height: 100px;
+            margin: 10px 0;
+            padding: 8px;
+        }
+        .messages-container {
+            margin: 20px auto;
+            max-width: 800px;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .pending-appeal {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #ffc107;
+            color: black;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .appeal-btn {
+            /* ... הסגנונות הקיימים ... */
+        }
+        
+        .appeal-btn[disabled] {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .appeal-status {
+            padding: 8px;
+            margin-top: 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        .appeal-status.pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .appeal-status.rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .admin-response {
+            margin-top: 5px;
+            font-size: 0.85em;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>המשמרות שלי</h1>
+                <p>שלום, {{ system.users[username].first_name }}</p>
+            </div>
+            <div>
+                <a href="{{ url_for('download_user_schedule') }}" class="btn download-btn">הורד PDF</a>
+                <a href="{{ url_for('logout') }}" class="btn logout-btn">התנתק</a>
+            </div>
+        </div>
+
+        <div class="view-toggle">
+            <a href="{{ url_for('user_schedule', view='week', week_offset=current_week_offset) }}" 
+               class="btn view-btn {% if view_type == 'week' %}active{% endif %}">
+                תצוגה שבועית
+            </a>
+            <a href="{{ url_for('user_schedule', view='month', week_offset=current_week_offset) }}" 
+               class="btn view-btn {% if view_type == 'month' %}active{% endif %}">
+                תצוגה חודשית
+            </a>
+        </div>
+
+        <div class="week-navigation">
+            {% if current_week_offset > 0 %}
+            <a href="{{ url_for('user_schedule', view=view_type, week_offset=current_week_offset-1) }}" class="btn nav-btn">
+                &rarr; {{ 'חודש הבא' if view_type == 'month' else 'שבוע הבא' }}
+            </a>
+            {% endif %}
+            
+            {% if current_week_offset == 0 %}
+            <span class="current-week">{{ 'החודש הנוכחי' if view_type == 'month' else 'השבוע הנוכחי' }}</span>
+            {% else %}
+            <span class="current-week">
+                {% if view_type == 'month' %}
+                לפני {{ current_week_offset // 4 }} חודשים
+                {% else %}
+                לפני {{ current_week_offset }} שבועות
+                {% endif %}
+            </span>
+            {% endif %}
+            
+            {% if current_week_offset < max_history_weeks %}
+            <a href="{{ url_for('user_schedule', view=view_type, week_offset=current_week_offset+1) }}" class="btn nav-btn">
+                {{ 'חודש קודם' if view_type == 'month' else 'שבוע קודם' }} &larr;
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="calendar-grid">
+            {% for day, shifts in user_schedule.items() %}
+            <div class="day-card">
+                <div class="day-header">{{ day }}</div>
+                {% for shift in shifts %}
+                <div class="shift-container">
+                    <div class="{% if loop.index0 == 0 %}shift-morning{% else %}shift-evening{% endif %}">
+                        <div class="shift-time">
+                            {{ 'משמרת בוקר' if loop.index0 == 0 else 'משמרת ערב' }}<br>
+                            {{ shift.start_time }} - {{ shift.end_time }}
+                        </div>
+                        
+                        {% set has_appeal, status, response = system.has_active_appeal(username, day, loop.index0) %}
+                        {% if has_appeal %}
+                            {% if status == 'pending' %}
+                                <div class="appeal-status pending">
+                                    <span>ממתין לתשובה על ערעור</span>
+                                </div>
+                            {% elif status == 'rejected' %}
+                                <div class="appeal-status rejected">
+                                    <span>הערעור נדחה</span>
+                                    {% if response %}
+                                        <div class="admin-response">סיבה: {{ response }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <button class="appeal-btn" onclick="openAppealModal('{{ day }}', {{ loop.index0 }})">
+                                ערער על משמרת
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="current-datetime">
+            <span class="current-date">{{ current_date }}</span>
+            <span class="current-time">{{ current_time }}</span>
+        </div>
+    </div>
+
+    <!-- מודאל ערעור -->
+    <div id="appealModal" class="modal">
+        <div class="modal-content">
+            <h3>ערעור על משמרת</h3>
+            <form id="appealForm" method="POST" action="{{ url_for('create_appeal') }}">
+                <input type="hidden" name="day" id="appealDay">
+                <input type="hidden" name="shift_index" id="appealShiftIndex">
+                <div>
+                    <label for="reason">סיבת הערעור:</label>
+                    <textarea name="reason" id="reason" required></textarea>
+                </div>
+                <div style="text-align: left;">
+                    <button type="button" onclick="closeAppealModal()">ביטול</button>
+                    <button type="submit" style="background-color: #28a745; color: white;">שלח ערעור</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openAppealModal(day, shiftIndex) {
+            document.getElementById('appealModal').style.display = 'block';
+            document.getElementById('appealDay').value = day;
+            document.getElementById('appealShiftIndex').value = shiftIndex;
+        }
+
+        function closeAppealModal() {
+            document.getElementById('appealModal').style.display = 'none';
+        }
+
+        // סגירת המודאל בלחיצה מחוץ לתוכן
+        window.onclick = function(event) {
+            var modal = document.getElementById('appealModal');
+            if (event.target == modal) {
+                closeAppealModal();
+            }
+        }
+    </script>
+</body>
+</html> 

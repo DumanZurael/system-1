@@ -1,0 +1,127 @@
+<div class="admin-nav">
+    <a href="{{ url_for('index') }}" {% if active_page == 'schedule' %}class="active"{% endif %}>
+        <i class="fas fa-calendar-alt"></i>
+        <span>לוח משמרות</span>
+    </a>
+    
+    <a href="{{ url_for('employees') }}" {% if active_page == 'employees' %}class="active"{% endif %}>
+        <i class="fas fa-users"></i>
+        <span>ניהול עובדים</span>
+    </a>
+    
+    <a href="{{ url_for('view_appeals') }}" {% if active_page == 'appeals' %}class="active"{% endif %}>
+        <i class="fas fa-exclamation-circle"></i>
+        <span>ערעורים</span>
+        {% if pending_appeals_count > 0 %}
+        <span class="appeals-badge">{{ pending_appeals_count }}</span>
+        {% endif %}
+    </a>
+    
+    <a href="{{ url_for('logout') }}" class="logout-link">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>התנתק</span>
+    </a>
+</div>
+
+<style>
+    .admin-nav {
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: var(--card-background);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .admin-nav a {
+        display: flex;
+        align-items: center;
+        padding: 8px 16px;
+        text-decoration: none;
+        color: var(--text-primary);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .admin-nav a i {
+        margin-left: 8px;
+        font-size: 1.2em;
+    }
+
+    .admin-nav a:hover {
+        background-color: var(--hover-color);
+    }
+
+    .admin-nav a.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .appeals-badge {
+        background-color: var(--danger-color);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        margin-right: 8px;
+    }
+
+    .logout-link {
+        margin-right: auto;
+        color: var(--danger-color) !important;
+    }
+
+    /* התאמה למובייל */
+    @media (max-width: 768px) {
+        .admin-nav {
+            flex-direction: column;
+            gap: 0;
+            margin: 0;
+            padding: 16px 0;
+            border-radius: 0;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            background-color: var(--card-background);
+            transition: right 0.3s ease;
+            z-index: 999;
+        }
+
+        .admin-nav.active {
+            right: 0;
+        }
+
+        .admin-nav a {
+            width: 100%;
+            padding: 16px 24px;
+            border-radius: 0;
+        }
+
+        .admin-nav a i {
+            width: 24px;
+            text-align: center;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            margin-right: 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* צל בצד שמאל כשהתפריט פתוח */
+        .admin-nav.active::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.1), transparent);
+            pointer-events: none;
+        }
+    }
+</style> 

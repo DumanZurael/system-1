@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ערעורים על משמרות</title>
+    <style>
+        .appeal-form {
+            margin: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .appeal-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status-pending { background-color: #ffc107; }
+        .status-approved { background-color: #28a745; color: white; }
+        .status-rejected { background-color: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>ערעורים על משמרות</h2>
+        
+        <!-- טופס ערעור חדש -->
+        <div class="appeal-form">
+            <h3>הגש ערעור חדש</h3>
+            <form action="{{ url_for('create_appeal') }}" method="POST">
+                <div class="form-group">
+                    <label>יום:</label>
+                    <select name="day" required>
+                        {% for day in schedule.keys() %}
+                            <option value="{{ day }}">{{ day }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>משמרת:</label>
+                    <select name="shift_index" required>
+                        <option value="0">משמרת בוקר</option>
+                        <option value="1">משמרת ערב</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>סיבת הערעור:</label>
+                    <textarea name="reason" required></textarea>
+                </div>
+                <button type="submit">שלח ערעור</button>
+            </form>
+        </div>
+
+        <!-- רשימת הערעורים הקיימים -->
+        <div class="appeals-list">
+            <h3>הערעורים שלי</h3>
+            {% for appeal in appeals %}
+            <div class="appeal-item">
+                <p>תאריך: {{ appeal.day }}</p>
+                <p>משמרת: {{ 'בוקר' if appeal.shift_index == 0 else 'ערב' }}</p>
+                <p>סיבה: {{ appeal.reason }}</p>
+                <p>סטטוס: 
+                    <span class="appeal-status status-{{ appeal.status }}">
+                        {{ {'pending': 'ממתין', 'approved': 'אושר', 'rejected': 'נדחה'}[appeal.status] }}
+                    </span>
+                </p>
+                {% if appeal.admin_response %}
+                <p>תגובת מנהל: {{ appeal.admin_response }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>הוספת עובד חדש - שקדייה</title>
+    {% include 'admin_base.html' %}
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        .required-field::after {
+            content: "*";
+            color: var(--danger-color);
+            margin-right: 4px;
+        }
+        
+        .form-hint {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>הוספת עובד חדש</h1>
+        
+        {% include 'admin_nav.html' %}
+        
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('add_employee') }}">
+                <div class="form-group">
+                    <label class="required-field">שם משתמש</label>
+                    <input type="text" name="username" class="form-control" required>
+                    <div class="form-hint">שם משתמש ישמש להתחברות למערכת</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="required-field">סיסמה ראשונית</label>
+                    <input type="text" name="password" class="form-control" value="1234" required>
+                    <div class="form-hint">סיסמה ראשונית שהעובד יוכל לשנות בהמשך (ברירת מחדל: 1234)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="required-field">שם פרטי</label>
+                    <input type="text" name="first_name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="required-field">שם משפחה</label>
+                    <input type="text" name="last_name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>מספר עובד</label>
+                    <input type="text" name="employee_number" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>טלפון</label>
+                    <input type="tel" name="phone" class="form-control" 
+                           pattern="[0-9]{10}" title="נא להזין מספר טלפון בן 10 ספרות">
+                </div>
+                
+                <div class="form-group">
+                    <label>אימייל</label>
+                    <input type="email" name="email" class="form-control">
+                </div>
+                
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary">הוסף עובד</button>
+                    <a href="{{ url_for('employees') }}" class="btn btn-danger">ביטול</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // בדיקת תקינות טופס בצד הלקוח
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const username = document.querySelector('input[name="username"]').value;
+            const firstName = document.querySelector('input[name="first_name"]').value;
+            const lastName = document.querySelector('input[name="last_name"]').value;
+            
+            if (!username || !firstName || !lastName) {
+                e.preventDefault();
+                alert('נא למלא את כל השדות החובה');
+            }
+        });
+    </script>
+</body>
+</html> 
